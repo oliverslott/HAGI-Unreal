@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <GameFramework/SpringArmComponent.h>
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "MyCharacter.generated.h"
@@ -31,4 +32,25 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Aim")
 	float CalculateAimPitch();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+	float ZoomedDistance = 180.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+	float ZoomSpeed = 10.0f;
+
+	UFUNCTION(BlueprintCallable, Category = "Camera")
+	void StartZoom();
+
+	UFUNCTION(BlueprintCallable, Category = "Camera")
+	void StopZoom();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
+	USpringArmComponent* CameraBoomToZoom;
+
+private:
+	float DefaultArmLength = 400.0f;
+	float isZooming = false;
+
+	void UpdateCameraZoom(float DeltaTime);
 };
