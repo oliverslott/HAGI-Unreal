@@ -15,7 +15,13 @@ AMyCharacter::AMyCharacter()
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	CameraBoomToZoom = FindComponentByClass<USpringArmComponent>();
+
+	if (CameraBoomToZoom)
+	{
+		DefaultArmLength = CameraBoomToZoom->TargetArmLength;
+	}
 }
 
 // Called every frame
@@ -24,6 +30,7 @@ void AMyCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	AimPitch = CalculateAimPitch();
+	UpdateCameraZoom(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -47,3 +54,24 @@ float AMyCharacter::CalculateAimPitch()
 	return FMath::Clamp(NormalizedPitch, -1.0f, 1.0f);
 }
 
+void AMyCharacter::UpdateCameraZoom(float DeltaTime)
+{
+	if (!CameraBoomToZoom)
+	{
+		return;
+	}
+
+	const float TargetArmLength = isZooming ? ZoomedDistance : DefaultArmLength;
+
+	CameraBoomToZoom->TargetArmLength = FMath::FInterpTo(CameraBoomToZoom->TargetArmLength, TargetArmLength, DeltaTime, ZoomSpeed);
+}
+
+void AMyCharacter::StartZoom()
+{
+	isZooming = true;
+}
+
+void AMyCharacter::StopZoom()
+{
+	isZooming = false;
+}
