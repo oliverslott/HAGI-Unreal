@@ -19,15 +19,32 @@ void UHAGIGameInstance::Shutdown()
 	Super::Shutdown();
 }
 
-void UHAGIGameInstance::RecordPlayerDeath(int32 FinalScore)
+void UHAGIGameInstance::UpdateCurrentScore(int32 CurrentScore)
 {
-	LastScore = FMath::Max(0, FinalScore);
-	bDeathSummaryPending = true;
+	LastScore = FMath::Max(0, CurrentScore);
 }
 
 void UHAGIGameInstance::HandlePostLoadMap(UWorld* LoadedWorld)
 {
-	if (!bDeathSummaryPending || !LoadedWorld || !LoadedWorld->GetMapName().Contains(TEXT("Lvl_Menu")))
+	if (!LoadedWorld)
+	{
+		return;
+	}
+
+	const FString MapName = LoadedWorld->GetMapName();
+	if (MapName.Contains(TEXT("Lvl_ThirdPerson")))
+	{
+		bGameplaySessionActive = true;
+		bDeathSummaryPending = false;
+		LastScore = 0;
+	}
+	else if (MapName.Contains(TEXT("Lvl_Menu")) && bGameplaySessionActive)
+	{
+		bGameplaySessionActive = false;
+		bDeathSummaryPending = true;
+	}
+
+	if (!bDeathSummaryPending || !MapName.Contains(TEXT("Lvl_Menu")))
 	{
 		return;
 	}
