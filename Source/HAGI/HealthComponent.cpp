@@ -2,6 +2,7 @@
 
 
 #include "HealthComponent.h"
+#include "HAGIGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "MyCharacter.h"
 #include "GameFramework/Pawn.h"
@@ -45,13 +46,25 @@ void UHealthComponent::TakeDamageAmount(float Amount)
 
 	const float PreviousHealth = CurrentHealth;
 	CurrentHealth = FMath::Clamp(CurrentHealth - Amount, 0.0f, MaxHealth);
+
+	const APawn* OwnerPawn = Cast<APawn>(GetOwner());
+	if (PreviousHealth > 0.0f && IsDead() && OwnerPawn && OwnerPawn->IsPlayerControlled())
+	{
+		if (const AMyCharacter* Player = Cast<AMyCharacter>(OwnerPawn))
+		{
+			if (UHAGIGameInstance* GameInstance = Cast<UHAGIGameInstance>(GetWorld()->GetGameInstance()))
+			{
+				GameInstance->RecordPlayerDeath(Player->GetScore());
+			}
+		}
+	}
+
 	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
 
 	if (PreviousHealth > 0.0f && IsDead())
 	{
 		OnDeath.Broadcast();
 
-		const APawn* OwnerPawn = Cast<APawn>(GetOwner());
 		if (OwnerPawn && !OwnerPawn->IsPlayerControlled())
 		{
 			if (AMyCharacter* Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0)))
