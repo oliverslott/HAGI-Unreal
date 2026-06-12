@@ -7,6 +7,8 @@
 #include "GameFramework/Character.h"
 #include "MyCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnScoreChanged, int32, NewScore);
+
 UCLASS()
 class HAGI_API AMyCharacter : public ACharacter
 {
@@ -45,6 +47,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Camera")
 	void StopZoom();
 
+	UFUNCTION(BlueprintCallable, Category = "Score")
+	void AddScore(int32 Amount = 1);
+
+	UFUNCTION(BlueprintPure, Category = "Score")
+	int32 GetScore() const { return Score; }
+
+	UPROPERTY(BlueprintAssignable, Category = "Score")
+	FOnScoreChanged OnScoreChanged;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Score")
+	int32 Score = 0;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
 	USpringArmComponent* CameraBoomToZoom;
 
@@ -53,4 +67,5 @@ private:
 	float isZooming = false;
 
 	void UpdateCameraZoom(float DeltaTime);
+	void UpdateScoreHud();
 };
