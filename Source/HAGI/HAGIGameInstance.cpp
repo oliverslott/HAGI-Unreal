@@ -32,14 +32,21 @@ void UHAGIGameInstance::HandlePostLoadMap(UWorld* LoadedWorld)
 		return;
 	}
 
-	LoadedWorld->GetTimerManager().SetTimerForNextTick(
-		FTimerDelegate::CreateUObject(this, &UHAGIGameInstance::ShowDeathSummary, LoadedWorld));
+	FTimerDelegate ShowSummaryDelegate = FTimerDelegate::CreateUObject(
+		this, &UHAGIGameInstance::ShowDeathSummary, LoadedWorld);
+	LoadedWorld->GetTimerManager().SetTimer(
+		DeathSummaryRetryTimer, ShowSummaryDelegate, 0.1f, true, 0.0f);
 }
 
 void UHAGIGameInstance::ShowDeathSummary(UWorld* LoadedWorld)
 {
+	if (!bDeathSummaryPending || !LoadedWorld || !LoadedWorld->GetMapName().Contains(TEXT("Lvl_Menu")))
+	{
+		return;
+	}
+
 	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(LoadedWorld, 0);
-	if (!PlayerController)
+	if (!PlayerController || !PlayerController->IsLocalController())
 	{
 		return;
 	}
@@ -50,5 +57,6 @@ void UHAGIGameInstance::ShowDeathSummary(UWorld* LoadedWorld)
 		DeathSummaryWidget->SetFinalScore(LastScore);
 		DeathSummaryWidget->AddToViewport(100);
 		bDeathSummaryPending = false;
+		LoadedWorld->GetTimerManager().ClearTimer(DeathSummaryRetryTimer);
 	}
 }

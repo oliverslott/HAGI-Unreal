@@ -24,4 +24,6 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<class UDeathSummaryWidget> DeathSummaryWidget;
+
+	FTimerHandle DeathSummaryRetryTimer;
 };
