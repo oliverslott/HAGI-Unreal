@@ -2,6 +2,11 @@
 
 
 #include "MyCharacter.h"
+#include "HAGIGameInstance.h"
+#include "Blueprint/UserWidget.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Blueprint/WidgetTree.h"
+#include "Components/TextBlock.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -74,4 +79,41 @@ void AMyCharacter::StartZoom()
 void AMyCharacter::StopZoom()
 {
 	isZooming = false;
+}
+
+void AMyCharacter::AddScore(int32 Amount)
+{
+	if (Amount <= 0)
+	{
+		return;
+	}
+
+	Score += Amount;
+	if (UHAGIGameInstance* GameInstance = Cast<UHAGIGameInstance>(GetGameInstance()))
+	{
+		GameInstance->UpdateCurrentScore(Score);
+	}
+	OnScoreChanged.Broadcast(Score);
+	UpdateScoreHud();
+}
+
+void AMyCharacter::UpdateScoreHud()
+{
+	TArray<UUserWidget*> HudWidgets;
+	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(this, HudWidgets, UUserWidget::StaticClass(), false);
+
+	for (UUserWidget* Widget : HudWidgets)
+	{
+		if (!Widget || !Widget->GetClass()->GetPathName().Contains(TEXT("HUD_PLAYER")))
+		{
+			continue;
+		}
+
+		if (UTextBlock* ScoreText = Cast<UTextBlock>(Widget->WidgetTree->FindWidget(TEXT("Score"))))
+		{
+			ScoreText->SetText(FText::Format(
+				NSLOCTEXT("HAGI", "ScoreFormat", "Score: {0}"),
+				FText::AsNumber(Score)));
+		}
+	}
 }

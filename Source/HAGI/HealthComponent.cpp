@@ -2,6 +2,9 @@
 
 
 #include "HealthComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "MyCharacter.h"
+#include "GameFramework/Pawn.h"
 
 // Sets default values for this component's properties
 UHealthComponent::UHealthComponent()
@@ -35,17 +38,28 @@ void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 void UHealthComponent::TakeDamageAmount(float Amount)
 {
-	if (Amount <= 0.0f)
+	if (Amount <= 0.0f || IsDead())
 	{
 		return;
 	}
 
+	const float PreviousHealth = CurrentHealth;
 	CurrentHealth = FMath::Clamp(CurrentHealth - Amount, 0.0f, MaxHealth);
+
+	const APawn* OwnerPawn = Cast<APawn>(GetOwner());
 	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
 
-	if (CurrentHealth <= 0.0f)
+	if (PreviousHealth > 0.0f && IsDead())
 	{
 		OnDeath.Broadcast();
+
+		if (OwnerPawn && !OwnerPawn->IsPlayerControlled())
+		{
+			if (AMyCharacter* Player = Cast<AMyCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0)))
+			{
+				Player->AddScore();
+			}
+		}
 	}
 }
 
