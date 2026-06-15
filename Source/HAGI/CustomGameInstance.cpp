@@ -1,4 +1,4 @@
-#include "HAGIGameInstance.h"
+#include "CustomGameInstance.h"
 
 #include "DeathSummaryWidget.h"
 #include "Engine/World.h"
@@ -7,24 +7,24 @@
 #include "TimerManager.h"
 #include "UObject/UObjectGlobals.h"
 
-void UHAGIGameInstance::Init()
+void UCustomGameInstance::Init()
 {
 	Super::Init();
-	FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &UHAGIGameInstance::HandlePostLoadMap);
+	FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &UCustomGameInstance::HandlePostLoadMap);
 }
 
-void UHAGIGameInstance::Shutdown()
+void UCustomGameInstance::Shutdown()
 {
 	FCoreUObjectDelegates::PostLoadMapWithWorld.RemoveAll(this);
 	Super::Shutdown();
 }
 
-void UHAGIGameInstance::UpdateCurrentScore(int32 CurrentScore)
+void UCustomGameInstance::UpdateCurrentScore(int32 CurrentScore)
 {
 	LastScore = FMath::Max(0, CurrentScore);
 }
 
-void UHAGIGameInstance::HandlePostLoadMap(UWorld* LoadedWorld)
+void UCustomGameInstance::HandlePostLoadMap(UWorld* LoadedWorld)
 {
 	if (!LoadedWorld)
 	{
@@ -50,12 +50,12 @@ void UHAGIGameInstance::HandlePostLoadMap(UWorld* LoadedWorld)
 	}
 
 	FTimerDelegate ShowSummaryDelegate = FTimerDelegate::CreateUObject(
-		this, &UHAGIGameInstance::ShowDeathSummary, LoadedWorld);
+		this, &UCustomGameInstance::ShowDeathSummary, LoadedWorld);
 	LoadedWorld->GetTimerManager().SetTimer(
 		DeathSummaryRetryTimer, ShowSummaryDelegate, 0.1f, true, 0.0f);
 }
 
-void UHAGIGameInstance::ShowDeathSummary(UWorld* LoadedWorld)
+void UCustomGameInstance::ShowDeathSummary(UWorld* LoadedWorld)
 {
 	if (!bDeathSummaryPending || !LoadedWorld || !LoadedWorld->GetMapName().Contains(TEXT("Lvl_Menu")))
 	{

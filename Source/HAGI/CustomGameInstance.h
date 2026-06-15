@@ -2,10 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
-#include "HAGIGameInstance.generated.h"
+#include "CustomGameInstance.generated.h"
 
 UCLASS()
-class HAGI_API UHAGIGameInstance : public UGameInstance
+class HAGI_API UCustomGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 

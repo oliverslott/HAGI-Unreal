@@ -2,7 +2,7 @@
 
 
 #include "MyCharacter.h"
-#include "HAGIGameInstance.h"
+#include "CustomGameInstance.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Blueprint/WidgetTree.h"
@@ -89,7 +89,7 @@ void AMyCharacter::AddScore(int32 Amount)
 	}
 
 	Score += Amount;
-	if (UHAGIGameInstance* GameInstance = Cast<UHAGIGameInstance>(GetGameInstance()))
+	if (UCustomGameInstance* GameInstance = Cast<UCustomGameInstance>(GetGameInstance()))
 	{
 		GameInstance->UpdateCurrentScore(Score);
 	}
